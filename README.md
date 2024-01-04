@@ -1,8 +1,8 @@
-stage("config_Deploy"){
-    when {
-        expression { params.stages.contains("config_Deploy") }
-    }
-    steps {
-        // Your steps for config_Deploy
-    }
-}
+---
+- name: Dummy Playbook for Validation
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Output a debug message
+      debug:
+        msg: "The playbook has been called successfully!"
