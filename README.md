@@ -26,3 +26,8 @@ for i in "${!ports[@]}"; do
   # Use sed to replace any placeholders in the src file
   # Then copy the src to the dst
 done
+
+
+
+"{{ ServiceConfig.server_port if ServiceConfig.server_port is string else ServiceConfig.server_port | join(',') }}"
+
