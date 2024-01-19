@@ -24,4 +24,13 @@ if [[ "${cm_src_dest}" != "-" ]]; then
 fi
 
 
-cm_src_dest: "{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/logback.xml.j2:/app/bbportal/conf/ecomm_akka_bbp_seed.2641.logback.xml,{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/logback.xml.j2:/app/bbportal/conf/ecomm_akka_bbp_seed.2642.logback.xml,{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/logback.xml.j2:/app/bbportal/conf/ecomm_akka_bbp_seed.{{server_port}}.logback.xml{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/{{EnvIndex}}/bbportal.conf.j2:/app/bbportal/conf/bbportal.conf"
+application:
+    - name: ecomm-akka-bbp-seed
+      server_port: "2641,2642"
+      limit_memory: "1g"
+      instance_count: 2
+      context: "ecomm_akka_bbp_seed"
+      host: "{{Prefix}}" 
+      registry: "{{EnvIndex}}_REGISTRY1"
+      JAVA_OPTS:  "/app/bbportal/akka/ecomm_akka_bbp_seed/bin/ecomm_akka_bbp_seed -J-Xms512M -J-Xmx1g -J-server -J-javaagent:/app/infra/newrelic/newrelic.jar -Dnewrelic.config.app_name=EVBV-BBPORTAL-ecomm_akka_bbp_seed-GREEN-{{Region}}-AWSE -Dnewrelic.config.proxy_host=proxy.ebiz.verizon.com -Dnewrelic.config.proxy_port=80 -Dnewrelic.config.process_host.display_name={{hostIp}}.ebiz.verizon.com:bbportal:ecomm_akka_bbp_seed:{{server_port}}  -Dnewrelic.config.distributed_tracing.enabled=true $ADD_OPTS -DPROXY_HOST=proxy.ebiz.verizon.com -DPROXY_PORT=80 -Dorg.aspectj.tracing.factory=default -Djavax.net.ssl.keyStore=/app/rsa/eps/{{DisplayName}} -Djavax.net.ssl.keyStorePassword={{DisplayName2}} -Djavax.net.ssl.keyStoreType=JKS -Dakka.logger-startup-timeout=15s -DlogBuildInfoEnabled=Y -Dakka.cluster.auto-down-unreachable-after=10s -Dconfig.file=/app/bbportal/conf/bbportal.conf -Dlogback.configurationFile=/app/bbportal/conf/ecomm_akka_bbp_seed.{{server_port}}.logback.xml -Dakka.remote.netty.tcp.hostname={{hostIp}} -Dakka.remote.netty.tcp.port={{server_port}} -Dakka.cluster.seed-nodes.0=akka.tcp://application@{{hostIp}}:2641 -Dakka.cluster.seed-nodes.1=akka.tcp://application@{{hostIp}}:2642"
+      cm_src_dest: "{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/logback.xml.j2:/app/bbportal/conf/ecomm_akka_bbp_seed.2641.logback.xml,{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/logback.xml.j2:/app/bbportal/conf/ecomm_akka_bbp_seed.2642.logback.xml,{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/logback.xml.j2:/app/bbportal/conf/ecomm_akka_bbp_seed.{{server_port}}.logback.xml{{ServiceRoot}}/tmpapp/akka_config/roles/restart-akka/templates/{{EnvIndex}}/bbportal.conf.j2:/app/bbportal/conf/bbportal.conf"
