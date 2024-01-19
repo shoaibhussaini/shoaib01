@@ -65,4 +65,7 @@ done
 
 grep -q "^$ARTIFACT_INFO_APP_NAME:" $ARTIFACT_INFO_DEPLOY_DIR/$ARTIFACT_INFO_FILE_NAME && ${USE_SED} -i "s/^$ARTIFACT_INFO_APP_NAME:.*/$ARTIFACT_INFO_APP_NAME:${tmp_Artifact_url}/" $ARTIFACT_INFO_DEPLOY_DIR/$ARTIFACT_INFO_FILE_NAME || echo "$ARTIFACT_INFO_APP_NAME:${tmp_Artifact_url}" >> $ARTIFACT_INFO_DEPLOY_DIR/$ARTIFACT_INFO_FILE_NAME
 
++ sed -i 's/^ecomm_akka_bbp_seed:.*/ecomm_akka_bbp_seed:EVBV_1DBBPORTAL/vzw/evbv/release/24.02.100/ecomm-akka-bbp-seed/ecomm-akka-bbp-seed-f378cfd-310333-01152024164618.zip/' /app/bbportal/akka/ecomm_akka_bbp_seed/artifact.info
+sed: -e expression #1, char 63: unknown option to `s'
+
 
