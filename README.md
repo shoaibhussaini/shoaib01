@@ -1,49 +1,28 @@
-if [ ${RESTART} == 'yes' ]; then  
-  SERVER_PORT=`echo ${SERVER_PORT} | sed -e s/\|/,/g`
-  PORT_COUNT=`echo ${SERVER_PORT}|awk -F',' '{print NF}'`
-  echo "Starting ${INSTANCE_NAME}......"
-  if [[ $PORT_COUNT -eq 1 ]]; 
-  then
-    if [[ "$INSTANCE_START_INDEX" && -n "${INSTANCE_START_INDEX}" ]]; then
-      for i in `seq $INSTANCE_START_INDEX $INSTANCE_COUNT` ; do
-        j=${i}
-        $SCRIPTS_DIR/startinstance.sh ${INSTANCE_NAME} ${j} ${SCRIPTS_DIR} ${SERVER_PORT} $INSTANCE_COUNT $ENV $MEM $VSAD $AppRoot 'true' ${curr_work_dir}
-        sleep 2
-      done
-    else 
-        for i in `seq 1 $INSTANCE_COUNT` ; do
-        j=${i}
-        if [[ $j -lt 10 ]];then
-          j="0$j"
-        fi
-        $SCRIPTS_DIR/startinstance.sh ${INSTANCE_NAME} ${j} ${SCRIPTS_DIR} ${SERVER_PORT} $INSTANCE_COUNT $ENV $MEM $VSAD $AppRoot 'true' ${curr_work_dir}
-        sleep 2
-      done
-    fi
-  elif [[ $PORT_COUNT -gt 1 &&  $PORT_COUNT -eq $INSTANCE_COUNT ]]; 
-  then
-    if [[ "$INSTANCE_START_INDEX" && -n "${INSTANCE_START_INDEX}" ]]; then
-        i=$INSTANCE_START_INDEX
-        for port_item in ${SERVER_PORT//,/ } ; do
-          j=${i}
-          $SCRIPTS_DIR/startinstance.sh ${INSTANCE_NAME} ${j} ${SCRIPTS_DIR} ${port_item} $INSTANCE_COUNT $ENV $MEM $VSAD $AppRoot 'false' ${curr_work_dir}
-          sleep 2
-          i=$(expr ${i} + 1)
-        done
-    else 
-      i=1
-        for port_item in ${SERVER_PORT//,/ } ; do
-          j=${i}
-          if [[ $j -lt 10 ]];then
-            j="0$j"
-          fi
-          $SCRIPTS_DIR/startinstance.sh ${INSTANCE_NAME} ${j} ${SCRIPTS_DIR} ${port_item} $INSTANCE_COUNT $ENV $MEM $VSAD $AppRoot 'false' ${curr_work_dir}
-          sleep 2
-          i=$(expr ${i} + 1)
-        done
-    fi
-  else
-    echo "Server port and instance count mismatch. Please validate"
-    exit 1
-  fi
-fi
+server_port: [2641, 2642]  # As a comma-separated list
+# or
+server_port:                # As a hyphenated list
+  - 2641
+  - 2642
+
+
+
+vars:
+  server_port_str: "{{ server_port | join(',') }}"
+
+
+IFS=',' read -r -a ports <<< "${SERVER_PORT}"
+for port in "${ports[@]}"; do
+  # Call the startinstance.sh script for each port
+done
+
+
+
+cm_src_dest: "path_to_template1:destination_path_logback_2641.xml,path_to_template2:destination_path_logback_2642.xml"
+
+
+for i in "${!ports[@]}"; do
+  src="path_to_template${i}"
+  dst="destination_path_logback_${ports[i]}.xml"
+  # Use sed to replace any placeholders in the src file
+  # Then copy the src to the dst
+done
