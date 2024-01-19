@@ -1,36 +1,24 @@
-server_port: [2641, 2642]  # As a comma-separated list
-# or
-server_port:                # As a hyphenated list
-  - 2641
-  - 2642
 
+IFS=' ' read -r -a SERVER_PORTS <<< "${SERVER_PORT}"
 
+if [[ "${cm_src_dest}" != "-" ]]; then
+  IFS=',' read -r -a CM_SRC_DEST_ITEMS <<< "${cm_src_dest}"
+  for ITEM in "${CM_SRC_DEST_ITEMS[@]}"; do
+    # Extract source and destination from the cm_src_dest item
+    IFS=':' read -r tmpKey tmpVal <<< "${ITEM}"
+    for PORT in "${SERVER_PORTS[@]}"; do
+      TMPVAL_MODIFIED="${tmpVal//{{SERVER_PORT}}/${PORT}}"
 
-vars:
-  server_port_str: "{{ server_port | join(',') }}"
-
-
-IFS=',' read -r -a ports <<< "${SERVER_PORT}"
-for port in "${ports[@]}"; do
-  # Call the startinstance.sh script for each port
-done
-
-
-
-cm_src_dest: "path_to_template1:destination_path_logback_2641.xml,path_to_template2:destination_path_logback_2642.xml"
-
-
-for i in "${!ports[@]}"; do
-  src="path_to_template${i}"
-  dst="destination_path_logback_${ports[i]}.xml"
-  # Use sed to replace any placeholders in the src file
-  # Then copy the src to the dst
-done
-
-
-
-"{{ '\"' + (ServiceConfig.server_port | replace(',', '|')) + '\"' if '|' in (ServiceConfig.server_port | replace(',', '|')) else ServiceConfig.server_port if ServiceConfig.server_port is string else ServiceConfig.server_port | join(',') }}"
-
-\"[2641| 2642]\"
-
-
+      echo "Processing config for port ${PORT}: SRC: ${tmpKey}, DEST: ${TMPVAL_MODIFIED}"
+      if [[ -d "${tmpKey}" ]]; then
+        cp -r "${tmpKey}" "${TMPVAL_MODIFIED}"
+      elif [[ -e "${tmpKey}" ]]; then
+        cp "${tmpKey}" "${TMPVAL_MODIFIED}"
+      else
+        echo "SRC config file doesn't exist: ${tmpKey}"
+        continue
+      fi
+      sed -i "s|{{SERVER_PORT}}|${PORT}|g" "${TMPVAL_MODIFIED}" || echo "Config file copy failed for port ${PORT}"
+    done
+  done
+fi
