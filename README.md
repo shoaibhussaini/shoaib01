@@ -205,3 +205,36 @@ if [ "$cm_src_dest" != "-" ]; then
     fi
   done
 fi
+=================================================================
+
+if [ "$cm_src_dest" != "-" ]; then
+  for cm_item in ${cm_src_dest//,/ } ; do
+    echo "Processing item: $cm_item"
+    
+    tmpKey=$(echo "$cm_item" | cut -d ":" -f 1 | sed "s|{{SERVER_PORT_ACTUAL}}|$SERVER_PORT|g")
+    tmpVal=$(echo "$cm_item" | cut -d ":" -f 2 | sed "s|{{SERVER_PORT_ACTUAL}}|$SERVER_PORT|g")
+
+    # Check if the placeholders were successfully replaced
+    if [[ "$tmpKey" == *{{SERVER_PORT_ACTUAL}}* ]] || [[ "$tmpVal" == *{{SERVER_PORT_ACTUAL}}* ]]; then
+      echo "Placeholder not replaced in $cm_item, skipping..."
+      continue
+    fi
+
+    echo "SRC: $tmpKey, DEST: $tmpVal"
+    if [ -d "$tmpKey" ]; then
+      cp -r "$tmpKey" "$tmpVal"
+    elif [ -e "$tmpKey" ]; then
+      cp "$tmpKey" "$tmpVal"
+      sed -i "s|{{APP_NAME}}|$APP_NAME|g;s|{{SERVER_PORT}}|$SERVER_PORT|g;s|{{ENV}}|$ENV|g;s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g;s|{{LOGS_DIR}}|$LOGS_DIR|g" "$tmpVal"
+    else
+      echo "Source config file doesn't exist: $tmpKey"
+    fi
+
+    # Check the exit status of the last command
+    if [[ $? -ne 0 ]]; then
+      echo "Config file copy failed for item: $cm_item"
+    fi
+  done
+fi
+----------------------------------------======================\
+
