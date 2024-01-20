@@ -81,6 +81,23 @@ fail=$(grep -rL "[WARN]" ${startup}/*/*.startup.out |
        sort -u |
        sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}')
 
+#!/usr/bin/bash
+svc=$1
+AppRoot=$2
+startup=$3
+svcregex=$(echo $svc | sed -e s/,/\|/g)
+
+fail=$(grep -rL "[WARN]" ${startup}/*/*.startup.out | grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)" ${startup}/*/*.startup.out | grep -oE "($svcregex)" | sort -u | sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}')
+echo "$fail"
+if [ "$fail" != "" ]; then
+  svc="$svc,$fail"
+fi
+echo "HealthFail:$fail"
+pass=$(echo $svc | sed -e 's/,/\n/g' | sort | uniq -u | sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}')
+echo "HealthPass:$pass"
+
+exit 0
+
 cat ecomm_akka_bbp_seed.startup.out | grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)"
 (standard input)
 
