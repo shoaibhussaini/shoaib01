@@ -173,5 +173,35 @@ if [ "$cm_src_dest" != "-" ]; then
   done
 fi
 =========================================================
-
-
+if [ "$cm_src_dest" != "-" ]; then
+  for cm_item in ${cm_src_dest//,/ } ; do
+    if [[ "$cm_item" =~ "{{SERVER_PORT_ACTUAL}}" ]]; then
+      echo "cm_item:$cm_item"
+      tmpKey=$(echo "$cm_item" | cut -d ":" -f 1 | sed -e "s|{{SERVER_PORT_ACTUAL}}|$SERVER_PORT|g")
+      tmpVal=$(echo "$cm_item" | cut -d ":" -f 2 | sed -e "s|{{SERVER_PORT_ACTUAL}}|$SERVER_PORT|g")
+      echo "SRC: $tmpKey, DEST: $tmpVal"
+      if [ -d "$tmpKey" ]; then
+        cp -r "$tmpKey" "$tmpVal"
+      elif [ -e "$tmpKey" ]; then
+        cp "$tmpKey" "$tmpVal"
+        sed -i "s|{{APP_NAME}}|$APP_NAME|g;s|{{SERVER_PORT}}|$SERVER_PORT|g;s|{{ENV}}|$ENV|g;s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g;s|{{LOGS_DIR}}|$LOGS_DIR|g" "$tmpVal"
+      else
+        echo "SRC config file doesn't exist"
+      fi
+    elif [[ "$cm_item" != *"{SERVER_PORT_ACTUAL}"* ]]; then
+      tmpKey=$(echo "$cm_item" | cut -d ":" -f 1)
+      tmpVal=$(echo "$cm_item" | cut -d ":" -f 2)
+      echo "SRC: $tmpKey, DEST: $tmpVal"
+      if [ -d "$tmpKey" ]; then
+        cp -r "$tmpKey" "$tmpVal"
+      elif [ -e "$tmpKey" ]; then
+        cp "$tmpKey" "$tmpVal"
+      else
+        echo "There is an error in config"
+      fi
+    fi  # This closes the if block
+    if [[ $? -ne 0 ]]; then
+      echo "Config file copy failed"
+    fi
+  done
+fi
