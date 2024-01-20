@@ -75,4 +75,10 @@ sed: -e expression #1, char 63: unknown option to `s'
 
 fail=$(grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)" ${startup}/*/*.startup.out | grep -oE "($svcregex)" | sort -u | sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}')
 
+fail=$(grep -rL "[WARN]" ${startup}/*/*.startup.out |
+       grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)" |
+       grep -oE "($svcregex)" |
+       sort -u |
+       sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}')
+
 
