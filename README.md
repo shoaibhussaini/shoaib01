@@ -125,3 +125,16 @@ cat ecomm_akka_bbp_seed.startup.out | grep -lE "(APPLICATION FAILED TO START|Hea
 
 grep -rL "[WARN]" ecomm_akka_bbp_seed.startup.out | grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)" ecomm_akka_bbp_seed.startup.out | grep -oE "ecomm_akka_bbp_seed" | sort -u | sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}'
 
+
+
+IFS=',' read -r -a cm_items <<< "$cm_src_dest"
+for cm_item in "${cm_items[@]}"; do
+  # Rest of the loop logic...
+done
+=====================
+
+tmpKey=$(echo "${cm_item}" | cut -d ":" -f 1)
+tmpVal=$(echo "${cm_item}" | cut -d ":" -f 2)
+sed -i "s|{{SERVER_PORT}}|$SERVER_PORT|g" "$tmpKey" "$tmpVal"
+
+
