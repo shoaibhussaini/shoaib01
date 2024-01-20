@@ -101,5 +101,5 @@ exit 0
 cat ecomm_akka_bbp_seed.startup.out | grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)"
 (standard input)
 
-
+grep -rL "[WARN]" ecomm_akka_bbp_seed.startup.out | grep -lE "(APPLICATION FAILED TO START|Heap|OutOfMemoryError|Unable to access jarfile|Caused by:)" ecomm_akka_bbp_seed.startup.out | grep -oE "ecomm_akka_bbp_seed" | sort -u | sed -n -e 'H;${x;s/\n/,/g;s/^,//;p;}'
 
