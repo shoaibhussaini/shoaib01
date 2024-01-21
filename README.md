@@ -340,3 +340,42 @@ if [ "$cm_src_dest" != "-" ]; then
   done
 fi
 ==================================================================
+if [ "$cm_src_dest" != "-" ]; then
+  for cm_item in ${cm_src_dest//,/ } ; do
+    echo "Processing item: $cm_item"
+
+    # Escape the pipe character '|' in SERVER_PORT for use in sed
+    escaped_server_port=$(echo "$SERVER_PORT" | sed 's/|/\\|/g')
+
+    # Replace the placeholder with the escaped server port value
+    tmpKey=$(echo "$cm_item" | cut -d ":" -f 1 | sed "s|{{SERVER_PORT_ACTUAL}}|$escaped_server_port|g")
+    tmpVal=$(echo "$cm_item" | cut -d ":" -f 2 | sed "s|{{SERVER_PORT_ACTUAL}}|$escaped_server_port|g")
+
+    echo "SRC: $tmpKey, DEST: $tmpVal"
+
+    # Ensure that the file is not created if the placeholder remains
+    if [[ "$tmpVal" == *{{SERVER_PORT_ACTUAL}}* ]]; then
+      echo "Placeholder {{SERVER_PORT_ACTUAL}} found in tmpVal, not creating file."
+      continue
+    fi
+
+    # Perform file operations
+    if [ -d "$tmpKey" ]; then
+      cp -r "$tmpKey" "$tmpVal"
+    elif [ -e "$tmpKey" ]; then
+      cp "$tmpKey" "$tmpVal"
+      if [ -e "$tmpKey" ]; then
+        echo "Applying sed modifications to $tmpVal"
+        sed -i "s#{{APP_NAME}}#$APP_NAME#g; s#{{SERVER_PORT}}#$escaped_server_port#g; s#{{ENV}}#$ENV#g; s#TIMESTAMP_VALUE#$TIMESTAMP_VALUE#g; s#{{LOGS_DIR}}#$LOGS_DIR#g" "$tmpVal"
+      fi
+    else
+      echo "Source config file doesn't exist: $tmpKey"
+    fi
+
+    # Check the exit status of the last command
+    if [[ $? -ne 0 ]]; then
+      echo "Config file copy failed for item: $cm_item"
+    fi
+  done
+fi
+===================================================
