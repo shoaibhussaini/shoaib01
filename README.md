@@ -420,42 +420,38 @@ if [ "$cm_src_dest" != "-" ]; then
   for cm_item in ${cm_src_dest//,/ } ; do
     echo "Processing item: $cm_item"
 
-    # Split cm_item into tmpKey and tmpVal
     tmpKey="${cm_item%%:*}"
     tmpVal="${cm_item##*:}"
 
-    # Check if SERVER_PORT is not empty and contains the placeholder
-    if [[ -n "$SERVER_PORT" && "$tmpVal" == *'{{SERVER_PORT_ACTUAL}}'* ]]; then
-      # Escape the pipe characters in SERVER_PORT for literal replacement
-      escaped_server_port="${SERVER_PORT//|/\\|}"
-      # Replace the placeholder with the escaped SERVER_PORT value
-      tmpKey="${tmpKey//'{{SERVER_PORT_ACTUAL}}'/$escaped_server_port}"
-      tmpVal="${tmpVal//'{{SERVER_PORT_ACTUAL}}'/$escaped_server_port}"
+    if [[ "$SERVER_PORT" == *"|"* ]]; then
+      first_port="${SERVER_PORT%%|*}"
+    else
+      first_port="$SERVER_PORT"
     fi
 
-    # If the placeholder is still present in tmpVal, skip file creation
-    if [[ "$tmpVal" == *'{{SERVER_PORT_ACTUAL}}'* ]]; then
-      echo "Placeholder {{SERVER_PORT_ACTUAL}} is still present in tmpVal, skipping file creation."
-      continue
-    fi
+    tmpKey="${tmpKey//\{\{SERVER_PORT_ACTUAL\}\}/$first_port}"
+    tmpVal="${tmpVal//\{\{SERVER_PORT_ACTUAL\}\}/$first_port}"
 
     echo "SRC: $tmpKey, DEST: $tmpVal"
 
-    # Perform file operations if the placeholder has been successfully replaced
+    if [[ "$tmpVal" == *'{{SERVER_PORT_ACTUAL}}'* ]] || [[ "$tmpVal" == *"|"* ]]; then
+      echo "Not creating file: $tmpVal"
+      continue
+    fi
+
     if [ -d "$tmpKey" ] || [ -e "$tmpKey" ]; then
       cp -r "$tmpKey" "$tmpVal"
-      # Apply sed modifications if tmpKey is a file
-      if [ -e "$tmpKey" ]; then
-        sed -i "s#{{APP_NAME}}#$APP_NAME#g; s#{{SERVER_PORT}}#$escaped_server_port#g; s#{{ENV}}#$ENV#g; s#TIMESTAMP_VALUE#$TIMESTAMP_VALUE#g; s#{{LOGS_DIR}}#$LOGS_DIR#g" "$tmpVal"
+      if [ -f "$tmpKey" ] && [[ ! "$tmpVal" == *"|"* ]]; then
+        sed -i "s#{{APP_NAME}}#$APP_NAME#g; s#{{SERVER_PORT}}#$first_port#g; s#{{ENV}}#$ENV#g; s#TIMESTAMP_VALUE#$TIMESTAMP_VALUE#g; s#{{LOGS_DIR}}#$LOGS_DIR#g" "$tmpVal"
       fi
     else
       echo "Source config file doesn't exist: $tmpKey"
     fi
 
-    # Check for errors
     if [[ $? -ne 0 ]]; then
-      echo "Config file copy failed for item: $cm_item"
+      echo "Copy or modification failed for: $cm_item"
     fi
   done
 fi
+
 =================================================
