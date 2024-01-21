@@ -417,30 +417,40 @@ if [ "$cm_src_dest" != "-" ]; then
 fi
 =================================================
 if [ "$cm_src_dest" != "-" ]; then
+  # Split SERVER_PORT into an array-like list of ports
+  ports=(${SERVER_PORT//|/ })
+
   for cm_item in ${cm_src_dest//,/ } ; do
     echo "Processing item: $cm_item"
 
     tmpKey="${cm_item%%:*}"
     tmpVal="${cm_item##*:}"
 
-    first_port="${SERVER_PORT%%|*}"  # Get the first port or the only port
-    tmpKey="${tmpKey//\{\{SERVER_PORT_ACTUAL\}\}/$first_port}"
-    tmpVal="${tmpVal//\{\{SERVER_PORT_ACTUAL\}\}/$first_port}"
+    # Loop through each port to process replacements
+    for port in "${ports[@]}"; do
+      modifiedKey="${tmpKey//\{\{SERVER_PORT_ACTUAL\}\}/$port}"
+      modifiedVal="${tmpVal//\{\{SERVER_PORT_ACTUAL\}\}/$port}"
 
-    echo "SRC: $tmpKey, DEST: $tmpVal"
+      echo "SRC: $modifiedKey, DEST: $modifiedVal"
 
-    if [ -d "$tmpKey" ] || [ -e "$tmpKey" ]; then
-      cp -r "$tmpKey" "$tmpVal"
-      if [ -f "$tmpVal" ]; then
-        sed -i "s|{{APP_NAME}}|$APP_NAME|g; s|{{SERVER_PORT}}|$first_port|g; s|{{ENV}}|$ENV|g; s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g; s|{{LOGS_DIR}}|$LOGS_DIR|g" "$tmpVal"
+      # Copy and modify the file for the current port
+      if [ -d "$modifiedKey" ] || [ -e "$modifiedKey" ]; then
+        cp -r "$modifiedKey" "$modifiedVal"
+        if [ -f "$modifiedVal" ]; then
+          # Use '|' as delimiter for sed to avoid conflicts with file paths
+          sed -i "s|{{APP_NAME}}|$APP_NAME|g; s|{{SERVER_PORT}}|$port|g; s|{{ENV}}|$ENV|g; s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g; s|{{LOGS_DIR}}|$LOGS_DIR|g" "$modifiedVal"
+        fi
+      else
+        echo "Source config file doesn't exist: $modifiedKey"
       fi
-    else
-      echo "Source config file doesn't exist: $tmpKey"
-    fi
 
-    if [[ $? -ne 0 ]]; then
-      echo "Copy or modification failed for: $cm_item"
-    fi
+      # Check for errors after processing the current port
+      if [[ $? -ne 0 ]]; then
+        echo "Copy or modification failed for port $port: $cm_item"
+        # If you want to stop the loop on failure, uncomment the next line
+        # break
+      fi
+    done
   done
 fi
 
