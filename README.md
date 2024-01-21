@@ -423,12 +423,7 @@ if [ "$cm_src_dest" != "-" ]; then
     tmpKey="${cm_item%%:*}"
     tmpVal="${cm_item##*:}"
 
-    if [[ "$SERVER_PORT" == *"|"* ]]; then
-      first_port="${SERVER_PORT%%|*}"
-    else
-      first_port="$SERVER_PORT"
-    fi
-
+    first_port="${SERVER_PORT%%|*}"  # Get the first port or the only port
     tmpKey="${tmpKey//\{\{SERVER_PORT_ACTUAL\}\}/$first_port}"
     tmpVal="${tmpVal//\{\{SERVER_PORT_ACTUAL\}\}/$first_port}"
 
@@ -437,10 +432,7 @@ if [ "$cm_src_dest" != "-" ]; then
     if [ -d "$tmpKey" ] || [ -e "$tmpKey" ]; then
       cp -r "$tmpKey" "$tmpVal"
       if [ -f "$tmpVal" ]; then
-        # Apply the sed replacements for server port and app name within the file
-        sed -i "s/{{APP_NAME}}/$APP_NAME/g; s/{{SERVER_PORT}}/$first_port/g; s/{{ENV}}/$ENV/g; s/TIMESTAMP_VALUE/$TIMESTAMP_VALUE/g; s/{{LOGS_DIR}}/$LOGS_DIR/g" "$tmpVal"
-        # If there are other placeholders to replace, add more sed commands here
-        # sed -i "s/{{ANOTHER_PLACEHOLDER}}/$replacement_value/g" "$tmpVal"
+        sed -i "s|{{APP_NAME}}|$APP_NAME|g; s|{{SERVER_PORT}}|$first_port|g; s|{{ENV}}|$ENV|g; s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g; s|{{LOGS_DIR}}|$LOGS_DIR|g" "$tmpVal"
       fi
     else
       echo "Source config file doesn't exist: $tmpKey"
@@ -451,6 +443,7 @@ if [ "$cm_src_dest" != "-" ]; then
     fi
   done
 fi
+
 
 
 
