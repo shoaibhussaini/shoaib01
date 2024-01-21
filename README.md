@@ -418,6 +418,7 @@ fi
 =================================================
 if [ "$cm_src_dest" != "-" ]; then
   # Split SERVER_PORT into an array-like list of ports
+  # This will be a single item array if there's no delimiter
   ports=(${SERVER_PORT//|/ })
 
   for cm_item in ${cm_src_dest//,/ } ; do
@@ -426,10 +427,14 @@ if [ "$cm_src_dest" != "-" ]; then
     tmpKey="${cm_item%%:*}"
     tmpVal="${cm_item##*:}"
 
-    # Loop through each port to process replacements
+    # Replace the placeholder with the actual server port value for each port
     for port in "${ports[@]}"; do
-      modifiedKey="${tmpKey//\{\{SERVER_PORT_ACTUAL\}\}/$port}"
-      modifiedVal="${tmpVal//\{\{SERVER_PORT_ACTUAL\}\}/$port}"
+      # Use the PORT variable directly if it's a single integer
+      # If PORT is not set, use the loop variable 'port'
+      port_to_use=${PORT:-$port}
+
+      modifiedKey="${tmpKey//\{\{SERVER_PORT_ACTUAL\}\}/$port_to_use}"
+      modifiedVal="${tmpVal//\{\{SERVER_PORT_ACTUAL\}\}/$port_to_use}"
 
       echo "SRC: $modifiedKey, DEST: $modifiedVal"
 
@@ -437,8 +442,8 @@ if [ "$cm_src_dest" != "-" ]; then
       if [ -d "$modifiedKey" ] || [ -e "$modifiedKey" ]; then
         cp -r "$modifiedKey" "$modifiedVal"
         if [ -f "$modifiedVal" ]; then
-          # Use '|' as delimiter for sed to avoid conflicts with file paths
-          sed -i "s|{{APP_NAME}}|$APP_NAME|g; s|{{SERVER_PORT}}|$port|g; s|{{ENV}}|$ENV|g; s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g; s|{{LOGS_DIR}}|$LOGS_DIR|g" "$modifiedVal"
+          # Apply the sed replacements for server port and app name within the file
+          sed -i "s|{{APP_NAME}}|$APP_NAME|g; s|{{SERVER_PORT}}|$port_to_use|g; s|{{ENV}}|$ENV|g; s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g; s|{{LOGS_DIR}}|$LOGS_DIR|g" "$modifiedVal"
         fi
       else
         echo "Source config file doesn't exist: $modifiedKey"
@@ -446,7 +451,7 @@ if [ "$cm_src_dest" != "-" ]; then
 
       # Check for errors after processing the current port
       if [[ $? -ne 0 ]]; then
-        echo "Copy or modification failed for port $port: $cm_item"
+        echo "Copy or modification failed for port $port_to_use: $cm_item"
         # If you want to stop the loop on failure, uncomment the next line
         # break
       fi
