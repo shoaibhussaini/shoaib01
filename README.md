@@ -271,3 +271,34 @@ if [ "$cm_src_dest" != "-" ]; then
     fi
   done
 fi
+==================================================================
+
+if [ "$cm_src_dest" != "-" ]; then
+  for cm_item in ${cm_src_dest//,/ } ; do
+    echo "Processing item: $cm_item"
+    tmpKey=$(echo "$cm_item" | cut -d ":" -f 1 | sed "s|{{SERVER_PORT_ACTUAL}}|$SERVER_PORT|g")
+    tmpVal=$(echo "$cm_item" | cut -d ":" -f 2 | sed "s|{{SERVER_PORT_ACTUAL}}|$SERVER_PORT|g")
+
+    # Check for the existence of {{SERVER_PORT_ACTUAL}} in tmpVal
+    if [[ "$tmpVal" == *{{SERVER_PORT_ACTUAL}}* ]]; then
+      echo "Placeholder {{SERVER_PORT_ACTUAL}} found in tmpVal, removing file..."
+      rm -rf "$tmpVal"
+      continue
+    fi
+
+    echo "SRC: $tmpKey, DEST: $tmpVal"
+
+    if [ -d "$tmpKey" ] || [ -e "$tmpKey" ]; then
+      cp -r "$tmpKey" "$tmpVal"
+      # Apply sed modifications if tmpKey is a file
+      [ -e "$tmpKey" ] && sed -i "s|{{APP_NAME}}|$APP_NAME|g;s|{{SERVER_PORT}}|$SERVER_PORT|g;s|{{ENV}}|$ENV|g;s|TIMESTAMP_VALUE|$TIMESTAMP_VALUE|g;s|{{LOGS_DIR}}|$LOGS_DIR|g" "$tmpVal"
+    else
+      echo "Source config file doesn't exist: $tmpKey"
+    fi
+
+    if [[ $? -ne 0 ]]; then
+      echo "Config file copy failed for item: $cm_item"
+    fi
+  done
+fi
+==============================================================================
