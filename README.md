@@ -482,3 +482,8 @@ fi
 echo "Artifact: ${ARTIFACT_URL} downloaded";
 echo "STAGED FILE: $(ls -l "${STAGED_FILE}")"
 ===================================================
+  if [ ${VSAD} == 'evbv' ];
+  then
+    mv ${APP_NAME}* ${APP_NAME}
+  fi
+-----=================================
