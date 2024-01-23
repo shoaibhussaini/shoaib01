@@ -463,3 +463,22 @@ fi
 
 
 =================================================
+wget "${ARTIFACT_URL}" -q
+
+if [[ $? -ne 0 ]]; then
+  wget "${ARTIFACT_URL}" -q -O "${APP_NAME}.zip"
+  
+  if [[ $? -ne 0 ]]; then
+    echo "Artifact: ${ARTIFACT_URL} download failed";
+    exit 1;
+  fi
+  
+  STAGED_FILE="${APP_NAME}.zip"
+else
+  FILENAME=$(basename "${ARTIFACT_URL}")
+  STAGED_FILE="${FILENAME}"
+fi
+
+echo "Artifact: ${ARTIFACT_URL} downloaded";
+echo "STAGED FILE: $(ls -l "${STAGED_FILE}")"
+===================================================
