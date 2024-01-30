@@ -483,15 +483,17 @@ echo "Artifact: ${ARTIFACT_URL} downloaded";
 echo "STAGED FILE: $(ls -l "${STAGED_FILE}")"
 ===================================================
 
-tmp_Artifact_url=`echo ${ARTIFACT_URL} | awk -F"artifactory/" '{print $2}'`
-tmp_Artifact_url=$(echo "${ARTIFACT_URL}" | awk -F'artifactory/' '{print $2}')
-
-ARTIFACT_INFO_FILE_NAME="${ARTIFACT_INFO_FILE_NAME:=-}"
-ARTIFACT_INFO_APP_NAME="${ARTIFACT_INFO_APP_NAME:=$APP_NAME}"
-ARTIFACT_INFO_DEPLOY_DIR="${ARTIFACT_INFO_DEPLOY_DIR:=$DEPLOY_DIR}"
-if [ "${ARTIFACT_INFO_FILE_NAME}" != "-" ]; then
-  grep -q "^${ARTIFACT_INFO_APP_NAME}:" "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}" && ${USE_SED} -i "s/^${ARTIFACT_INFO_APP_NAME}:.*/${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}/" "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}" || echo "${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}" >> "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}"
-  echo "Artifact info file updated => ${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}"
+echo "Deployment files found for: ${APP_NAME}"
+wget ${ARTIFACT_URL} -P ${STAGE_DIR}/${APP_NAME} -q;
+if [[ $? -ne 0 ]]; then
+    echo "Artifact: ${ARTIFACT_URL} download failed";
+    exit 1; 
+fi
+echo "Artifact: ${ARTIFACT_URL} download successful";
+echo "STAGED FILE: $(ls -l $STAGE_DIR/$APP_NAME/${APP_NAME}*.$file_ext)"
+if [[ $? -ne 0 ]]; then
+  file_ext="tar"
+  echo "STAGED FILE: $(ls -l $STAGE_DIR/$APP_NAME/${APP_NAME}*.$file_ext)"
 fi
 
 -----=================================
