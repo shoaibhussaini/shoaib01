@@ -484,6 +484,8 @@ echo "STAGED FILE: $(ls -l "${STAGED_FILE}")"
 ===================================================
 
 tmp_Artifact_url=`echo ${ARTIFACT_URL} | awk -F"artifactory/" '{print $2}'`
+tmp_Artifact_url=$(echo "${ARTIFACT_URL}" | awk -F'artifactory/' '{print $2}')
+
 ARTIFACT_INFO_FILE_NAME="${ARTIFACT_INFO_FILE_NAME:=-}"
 ARTIFACT_INFO_APP_NAME="${ARTIFACT_INFO_APP_NAME:=$APP_NAME}"
 ARTIFACT_INFO_DEPLOY_DIR="${ARTIFACT_INFO_DEPLOY_DIR:=$DEPLOY_DIR}"
