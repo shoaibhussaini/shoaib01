@@ -490,10 +490,22 @@ if [[ $? -ne 0 ]]; then
     exit 1; 
 fi
 echo "Artifact: ${ARTIFACT_URL} download successful";
-echo "STAGED FILE: $(ls -l $STAGE_DIR/$APP_NAME/${APP_NAME}*.$file_ext)"
-if [[ $? -ne 0 ]]; then
-  file_ext="tar"
-  echo "STAGED FILE: $(ls -l $STAGE_DIR/$APP_NAME/${APP_NAME}*.$file_ext)"
+
+file_extensions=("zip" "tar" "war" "jar")
+
+for file_ext in "${file_extensions[@]}"; do
+    if ls -l "${STAGE_DIR}/${APP_NAME}/${APP_NAME}"*."${file_ext}" &>/dev/null; then
+        echo "STAGED FILE: $(ls -l "${STAGE_DIR}/${APP_NAME}/${APP_NAME}"*."${file_ext}")"
+        break
+    else
+        echo "No staged file found with .${file_ext} extension"
+    fi
+done
+
+if [[ ${file_ext} == "${file_extensions[-1]}" ]]; then
+    echo "No staged files found for any known extensions."
+    exit 1
 fi
+
 
 -----=================================
