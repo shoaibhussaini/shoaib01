@@ -483,6 +483,15 @@ echo "Artifact: ${ARTIFACT_URL} downloaded";
 echo "STAGED FILE: $(ls -l "${STAGED_FILE}")"
 ===================================================
 
-unexpected EOF while looking for matching `''
+if [ "${ARTIFACT_INFO_FILE_NAME}" != '-' ]; then
+  if grep -q "^${ARTIFACT_INFO_APP_NAME}:" "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}"; then
+    ${USE_SED} -i "s/^${ARTIFACT_INFO_APP_NAME}:.*/${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}/" "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}"
+  else
+    echo "${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}" >> "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}"
+  fi
+  echo "Artifact info file updated => ${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}"
+fi
+
+
 
 -----=================================
