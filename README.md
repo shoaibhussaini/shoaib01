@@ -483,12 +483,9 @@ echo "Artifact: ${ARTIFACT_URL} downloaded";
 echo "STAGED FILE: $(ls -l "${STAGED_FILE}")"
 ===================================================
 
-if [ ${ARTIFACT_INFO_FILE_NAME} != '-' ]; then
-  grep -q "^$ARTIFACT_INFO_APP_NAME:" $ARTIFACT_INFO_DEPLOY_DIR/$ARTIFACT_INFO_FILE_NAME && ${USE_SED} -i "s/^$ARTIFACT_INFO_APP_NAME:.*/$ARTIFACT_INFO_APP_NAME:${tmp_Artifact_url}/" $ARTIFACT_INFO_DEPLOY_DIR/$ARTIFACT_INFO_FILE_NAME || echo "$ARTIFACT_INFO_APP_NAME:${tmp_Artifact_url}" >> $ARTIFACT_INFO_DEPLOY_DIR/$ARTIFACT_INFO_FILE_NAME
-  echo "Artifact info file updated => $ARTIFACT_INFO_APP_NAME:${tmp_Artifact_url}"
+if [ "${ARTIFACT_INFO_FILE_NAME}" != '-' ]; then
+  grep -q "^${ARTIFACT_INFO_APP_NAME}:" "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}" && ${USE_SED} -i "s/^${ARTIFACT_INFO_APP_NAME}:.*/${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}/" "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}" || echo "${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}" >> "${ARTIFACT_INFO_DEPLOY_DIR}/${ARTIFACT_INFO_FILE_NAME}"
+  echo "Artifact info file updated => ${ARTIFACT_INFO_APP_NAME}:${tmp_Artifact_url}"
 fi
-  if [ ${VSAD} == 'evbv' ];
-  then
-    mv ${APP_NAME}* ${APP_NAME}
-  fi
+
 -----=================================
