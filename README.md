@@ -514,3 +514,17 @@ echo "Backup created: $(ls -l $ARCHIVE_DIR/$APP_NAME/${APP_NAME}_$NOW.$file_ext)
       echo "STAGED FILE: $(ls -l $ARCHIVE_DIR/$APP_NAME/${APP_NAME}_$NOW.tar)"
       fi
 =======================================================
+
+file_path="$ARCHIVE_DIR/$APP_NAME/${APP_NAME}_$NOW.$file_ext"
+
+if ls "$file_path" >/dev/null 2>&1; then
+    echo "Backup created: $(ls -l "$file_path")"
+else
+    file_path="$ARCHIVE_DIR/$APP_NAME/${APP_NAME}_$NOW.tar"
+    if ls "$file_path" >/dev/null 2>&1; then
+        echo "STAGED FILE: $(ls -l "$file_path")"
+    else
+        echo "Backup file not found."
+    fi
+fi
+====================================================
