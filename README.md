@@ -509,3 +509,8 @@ fi
 
 
 -----=================================
+echo "Backup created: $(ls -l $ARCHIVE_DIR/$APP_NAME/${APP_NAME}_$NOW.$file_ext)"
+      if [[ $? -ne 0 ]]; then
+      echo "STAGED FILE: $(ls -l $ARCHIVE_DIR/$APP_NAME/${APP_NAME}_$NOW.tar)"
+      fi
+=======================================================
