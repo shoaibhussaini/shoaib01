@@ -528,3 +528,50 @@ else
     fi
 fi
 ====================================================
+    - name: Get content of JSON file using slurp
+      slurp:
+        src: "{{ ServiceRoot }}/{{ ARTIFACT_STATUS_FILE_NAME }}"
+      register: json_file_content
+    
+    - name: Print decoded content
+      debug:
+        msg: "{{ json_file_content['content'] | b64decode }}"
+    
+    - name: Split the content into a list of JSON strings
+      set_fact:
+        json_strings: "{{ json_file_content['content'] | b64decode | split('\n') | replace('\n','') }}"
+    
+    - name: Parse the JSON content
+      set_fact:
+        json_content1: "{{ json_strings[0] | from_json }}"
+        
+    
+    - name: Fetch Previous Image Tag
+      set_fact:
+        previousServiceTag: "{{ json_content1.image_tag_before_rollback }}"
+      
+    - name: Display the stored variables
+      debug:
+        msg: "previousServiceTag: {{ previousServiceTag }}"
+
+    - name: Parse the Second JSON content
+      set_fact:
+        json_content2: "{{ json_strings[0] | from_json }}"
+        
+    
+    - name: Fetch Current Image Tag
+      set_fact:
+        currentServiceTag: "{{ json_content2.image_tag_after_rollback }}"
+      
+    - name: Display the stored variables
+      debug:
+        msg: "currentServiceTag: {{ currentServiceTag }}"
+
+    - name: extract commit id of previousServiceTag
+      set_fact:
+        commitid_brb: "{{ previousServiceTag | regex_search('^(?:[^.]*\\.){2}...(.{7})', '\\1') }}"
+
+    - name: extract commit id of currentServiceTag
+      set_fact:
+        commitid_arb: "{{ currentServiceTag | regex_search('^(?:[^.]*\\.){2}...(.{7})', '\\1') }}"
+=======================================================================================================
