@@ -573,3 +573,14 @@ fi
 
 jq '. += input' existing.json newData.json > temp.json && mv temp.json existing.json
 
+jq -n \
+  --arg e "$e" \
+  --arg f "$f" \
+  --arg g "$g" \
+  --arg h "$h" \
+  '{a: $e, b: $f, c: $g, d: $h}' > myfile.json
+
+}
+EOF
+
+
