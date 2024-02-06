@@ -570,3 +570,6 @@ fi
     commitid_arb: "{{ currentServiceTag | regex_search('^(?:[^.]*\\.){2}...(.{7})', '\\1') | default('') }}"
 
 =======================================================================================================
+
+jq '. += input' existing.json newData.json > temp.json && mv temp.json existing.json
+
