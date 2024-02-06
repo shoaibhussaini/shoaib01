@@ -581,6 +581,14 @@ jq -n \
   '{a: $e, b: $f, c: $g, d: $h}' > myfile.json
 
 }
-EOF
+
+
+echo "{
+\"a\":\"$e\",
+\"b\":\"$f\",
+\"c\":\"$g\",
+\"d\":\"$h\"
+}" > myfile.json
+
 
 
